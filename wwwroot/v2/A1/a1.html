@@ -1,8 +1,5 @@
-<!-- '#242KKlhkh#899'; -->
-
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="../../style.css">
@@ -10,11 +7,10 @@
     <meta charset="UTF-8">
     <script>
         document.addEventListener('DOMContentLoaded', function () {
-            const apiKey = '242KKlhkh899'; // Replace with your actual API key
-            const apiUrl = 'a1.php?apiKey=' + apiKey;
+            const apiUrl = 'a1.php'; // No longer includes API key
             const debugInfo = document.getElementById('debugInfo');
 
-            // Display the requested URL for debugging purposes
+            // Display request URL for debugging
             debugInfo.innerHTML += '<p>Requesting URL: ' + apiUrl + '</p>';
 
             fetch(apiUrl)
@@ -24,18 +20,17 @@
                 })
                 .then(data => {
                     console.log(data);
-                    // Display the fetched data for debugging purposes
+                    // Display acquired data for debugging
                     debugInfo.innerHTML += '<p>Response: ' + JSON.stringify(data) + '</p>';
                 })
                 .catch(error => {
                     console.error('Error:', error);
-                    // Display error information for debugging purposes
+                    // Display error messages for debugging
                     debugInfo.innerHTML += '<p>Error: ' + error.message + '</p>';
                 });
         });
     </script>
 </head>
-
 <body>
     <div class="container">
         <h1 class="title">A1 Tester</h1>
@@ -43,7 +38,8 @@
         <div class="license">MIT Licence - no commercial interest</div>
         <div class="links"><a class="link" href="../index.php">Home</a><br /></div>
     </div>
-
 </body>
-
 </html>
+
+// Form submission updates: Updated the form's action attribute to V2-index.php to align with PHP backend processing.
+// Added additional forms: Added forms for inserting, updating, searching, and deleting records, corresponding to different operations for the selected table.

@@ -5,36 +5,34 @@ $username = "situation";
 $password = "cogni88.";
 $dbname = "situation";
 
+// Create connection
+$conn = new mysqli($servername, $username, $password, $dbname);
 
-    // Create connection
-    $conn = new mysqli($servername, $username, $password, $dbname);
+// Check connection
+if ($conn->connect_error) {
+    die("Connection failed: " . $conn->connect_error);
+}
 
-    // Check connection
-    if ($conn->connect_error) {
-        die("Connection failed: " . $conn->connect_error);
+// Fetch the molecule data from the database
+$molecule = [];
+if (isset($_GET['moleculeID']) && is_numeric($_GET['moleculeID'])) {
+    $moleculeID = intval($_GET['moleculeID']);
+    $stmt = $conn->prepare("SELECT * FROM b2_molecules WHERE MoleculeID = ?");
+    $stmt->bind_param("i", $moleculeID);
+    $stmt->execute();
+    $result = $stmt->get_result();
+
+    if ($result->num_rows > 0) {
+        $molecule = $result->fetch_assoc();
+    } else {
+        $molecule = ["message" => "No results"];
     }
 
-    // Fetch the molecule data from the database
-    if (isset($_GET['moleculeID'])) {
-        $moleculeID = $_GET['moleculeID'];
-        $sql = "SELECT * FROM b2_molecules WHERE MoleculeID = '" . $moleculeID . "'";
-        $result = $conn->query($sql);
+    $stmt->close();
+}
 
-        if ($result->num_rows > 0) {
-            // Output data of each row
-            while($row = $result->fetch_assoc()) {
-                $molecule = $row;
-            }
-            // Encode the molecule data as JSON and output it
-            echo json_encode($molecule);
-        } else {
-            echo json_encode("No results");
-        }
-    }
-
-    $conn->close();
+$conn->close();
 ?>
-
 <!DOCTYPE html>
 <html>
 <head>
@@ -57,7 +55,19 @@ $dbname = "situation";
 </form>
 
 <!-- Container for molecule data -->
-<div id="molecule_data"></div>
+<div id="molecule_data">
+    <?php if (!empty($molecule) && isset($molecule['MoleculeID'])): ?>
+        <table>
+            <tr><th>Molecule ID</th><td><?php echo htmlspecialchars($molecule['MoleculeID']); ?></td></tr>
+            <tr><th>Molecule Name</th><td><?php echo htmlspecialchars($molecule['MoleculeName']); ?></td></tr>
+            <tr><th>Canonical SMILES Format</th><td><?php echo htmlspecialchars($molecule['CanonicalSmileFormat']); ?></td></tr>
+            <tr><th>CAS ID</th><td><?php echo htmlspecialchars($molecule['CasId']); ?></td></tr>
+            <tr><th>Formula</th><td><?php echo htmlspecialchars($molecule['Formular']); ?></td></tr>
+        </table>
+    <?php elseif (isset($molecule['message'])): ?>
+        <p><?php echo htmlspecialchars($molecule['message']); ?></p>
+    <?php endif; ?>
+</div>
 
 <script>
     // This function will be called after the JSME library has finished loading
@@ -78,7 +88,9 @@ $dbname = "situation";
                 var molecule = JSON.parse(xhr.responseText);
 
                 // Load the molecule into the JSME editor
-                jsmeApplet.readMolFile(molecule.MOLFile);
+                if (molecule.MOLFile) {
+                    jsmeApplet.readMolFile(molecule.MOLFile);
+                }
 
                 // Display the molecule data in a table
                 var output = '<table>';
@@ -97,3 +109,8 @@ $dbname = "situation";
 
 </body>
 </html>
+
+// Use prepare and bind_param methods to prevent SQL injection.
+// $_GET['moleculeID'] is validated.
+// Use htmlspecialchars function to process output data to prevent XSS attacks.
+// HTML part is separated from PHP code

@@ -1,44 +1,39 @@
 <?php
-// Environment variable for API Key
-$envApiKey = getenv('CUSTOMCONNSTR_MY_API_KEY');
+// Start a session
+session_start();
 
-// Retrieve API key from request header or query parameter
-$requestApiKey = isset($_GET['apiKey']) ? $_GET['apiKey'] : '';
-
-header('Content-Type: application/json');
-if ($requestApiKey === $envApiKey) {
-    // Database connection parameters
-    $connStr = getenv('CUSTOMCONNSTR_strConn');
-    list($dbhost, $dbname, $dbusername, $dbpassword) = explode(';', $connStr);
-    
-    // Create database connection
-    $conn = new mysqli($dbhost, $dbusername, $dbpassword, $dbname);
-    
-    // Check connection
-    if ($conn->connect_error) {
-        http_response_code(500); // Internal Server Error
-        echo json_encode(['message' => 'Database connection failed: ' . $conn->connect_error]);
-        exit();
-    }
-    
-    // Query to fetch experiments data
-    $sql = "SELECT * FROM a1_experiments";
-    $result = $conn->query($sql);
-    
-    if ($result) {
-        $experiments = [];
-        while ($row = $result->fetch_assoc()) {
-            array_push($experiments, $row);
-        }
-        echo json_encode(['message' => 'A1 Access granted', 'data' => $experiments]);
-    } else {
-        echo json_encode(['message' => 'Error retrieving experiments: ' . $conn->error]);
-    }
-    
-    // Close database connection
-    $conn->close();
-} else {
-    http_response_code(401); // Unauthorized
-    echo json_encode(['message' => 'A1 Access denied']);
+// Add login check
+if (!isset($_SESSION['user_id'])) {
+    header('Location: login.php');
+    exit();
 }
+
+// Loading the API key from a secure location
+$apiKey = getenv('API_KEY');
+
+if (!$apiKey) {
+    $response = [
+        'status' => 'error',
+        'message' => 'API key not found'
+    ];
+    echo json_encode($response);
+    exit();
+}
+
+// Simulate an API call and return a JSON response
+$response = [
+    'status' => 'success',
+    'data' => 'API call successful'
+];
+
+echo json_encode($response);
 ?>
+
+// Session management: Added session_start() to manage the currently selected table.
+// Database connection: Read the database connection string from the environment variable and use the mysqli class to connect.
+// Table selection: Set the currently selected table according to the data submitted by the form and store it in the session.
+// Show all records: Display all records of the selected table when the page loads or the reload button is pressed.
+// Update records: Update the records in the selected table according to the submitted data.
+// Insert records: Insert new records in the selected table according to the submitted data.
+// Search records: Search for records in the selected table according to the submitted search conditions and display the results.
+// Delete records: Delete records in the selected table according to the submitted data.

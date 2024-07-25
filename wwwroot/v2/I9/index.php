@@ -40,20 +40,23 @@
     <h2>Results</h2>
     <table id="moleculeResultsTable">
         <thead>
-       
+            <tr>
+                <th>Property Name</th>
+                <th>Value</th>
+            </tr>
         </thead>
         <tbody id="moleculeResults"></tbody>
     </table>
 </div>
 
 <!-- Edit Property Form -->
-<div class="update-property">
+<div class="update-property" style="display:none;">
     <label for="newPropertyValue">New Property Value:</label>
     <input type="text" name="newPropertyValue" id="newPropertyValue" placeholder="Enter new value">
     <button onclick="updateProperty()">Update Property</button>
 </div>
 <!-- Add New Property Button -->
-<div class="add-new-property-container">
+<div class="add-new-property-container" style="display:none;">
     <button onclick="addNewProperty()">Add New Property</button>
 </div>
 
@@ -74,7 +77,6 @@
         document.getElementById('newPropertyValue').placeholder = 'Edit ' + selectedProperty;
     }
 
-
     function updateProperty() {
         var selectedProperty = document.getElementById('property_input').value;
         var newPropertyValue = document.getElementById('newPropertyValue').value;
@@ -93,7 +95,6 @@
                     var moleculeId = document.getElementById("molecule_search").value;
                     searchMolecule(moleculeId);
                 }
-
             };
 
             xhr.open("POST", "update_property.php", true);
@@ -107,6 +108,7 @@
             alert('Please select a property and enter a new value.');
         }
     }
+
     function addNewProperty() {
         var moleculeId = document.getElementById("molecule_search").value;
         var selectedProperty = document.getElementById("property_input").value;
@@ -117,8 +119,6 @@
             xhr.onreadystatechange = function () {
                 if (this.readyState == 4 && this.status == 200) {
                     alert(this.responseText);
-
-
                     searchMolecule(moleculeId);
                 }
             };
@@ -126,18 +126,14 @@
             xhr.open("POST", "add_property.php", true);
             xhr.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
             xhr.send(
-                "moleculeId=" +
-                moleculeId +
-                "&selectedProperty=" +
-                selectedProperty +
-                "&newPropertyValue=" +
-                newPropertyValue
+                "moleculeId=" + moleculeId +
+                "&selectedProperty=" + selectedProperty +
+                "&newPropertyValue=" + newPropertyValue
             );
         } else {
             alert("Please select a property and enter a new value.");
         }
     }
-
 
     function searchMolecule() {
         var moleculeId = document.getElementById("molecule_search").value;
@@ -160,3 +156,5 @@
 </script>
 </body>
 </html>
+
+// didnt change much

@@ -16,15 +16,26 @@ session_start();
 <?php
 // Placeholder for authentication logic
 function authenticate($username, $password) {
-
     $credentials = getenv('CUSTOMCONNSTR_credentials');
-    list($valid_username, $valid_password) = explode(';', $credentials);
+    list($valid_username, $valid_password_hash) = explode(';', $credentials);
     
-    return $username === $valid_username && $password === $valid_password;
+    // Verify the password using password_verify
+    return $username === $valid_username && password_verify($password, $valid_password_hash);
+}
+
+// Generate a CSRF token
+if (empty($_SESSION['csrf_token'])) {
+    $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
 }
 
 // Check if the form is submitted
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
+    // Verify the CSRF token
+    if (!hash_equals($_SESSION['csrf_token'], $_POST['csrf_token'])) {
+        echo "<p>Invalid CSRF token. Please try again.</p>";
+        exit;
+    }
+
     $username = $_POST['username'];
     $password = $_POST['password'];
 
@@ -42,8 +53,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 }
 ?>
 
-
     <form method="post" action="login.php">
+        <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars($_SESSION['csrf_token']); ?>">
         <label for="username">Username:</label>
         <input type="text" id="username" name="username" required><br><br>
         <label for="password">Password:</label>
@@ -52,7 +63,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     </form>
     <br/><br/>
     <div class="links">
-                    <a class="link" href="../index.php">Main index</a><br/>
+        <a class="link" href="../index.php">Main index</a><br/>
     </div>
     <br/><br/>
     <div class="license">MIT Licence - no commercial interest</div>
@@ -60,3 +71,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 </body>
 </html>
 
+
+
+// Password Hashing: Use hashing to improve security when storing passwords.
+// HTML Form Security: Add csrf protection to prevent cross-site request forgery attacks.
